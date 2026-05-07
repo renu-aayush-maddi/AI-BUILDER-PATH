@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Assistant</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+
+        .container{
+            background: white;
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input, textarea{
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        button{
+            padding: 10px 20px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #response{
+            margin-top: 20px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 8px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>HR Leave Assistant</h1>
+
+    <input type="text" id="name" placeholder="Employee Name">
+
+    <input type="text" id="department" placeholder="Department">
+
+    <input type="text" id="location" placeholder="Location">
+
+    <textarea id="policy" placeholder="Leave Policy"></textarea>
+
+    <textarea id="notes" placeholder="HR Notes"></textarea>
+
+    <textarea id="query" placeholder="Ask your question"></textarea>
+
+    <button onclick="sendMessage()">
+        Ask
+    </button>
+
+    <div id="response"></div>
+
+</div>
+
+<script>
+
+async function sendMessage(){
+
+    const responseDiv = document.getElementById("response");
+
+    responseDiv.innerHTML = "Loading...";
+
+    const data = {
+
+        employee_name: document.getElementById("name").value,
+
+        department: document.getElementById("department").value,
+
+        location: document.getElementById("location").value,
+
+        leave_policy_by_location: document.getElementById("policy").value,
+
+        optional_hr_annotations: document.getElementById("notes").value,
+
+        user_input: document.getElementById("query").value
+    };
+
+    const response = await fetch("/chat", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    responseDiv.innerHTML = result.response;
+}
+
+</script>
+
+</body>
+</html>
