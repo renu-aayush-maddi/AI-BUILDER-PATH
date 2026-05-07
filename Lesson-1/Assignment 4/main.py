@@ -151,7 +151,6 @@ def chunk_text(text: str, size: int = 500, overlap: int = 100) -> list[str]:
 
 
 def build_user_prompt(context: str, query: str) -> str:
-    """Inject retrieved policy context into the user turn."""
     return (
         "=== ACME SAAS BILLING POLICY CONTEXT (retrieved) ===\n"
         f"{context}\n"
