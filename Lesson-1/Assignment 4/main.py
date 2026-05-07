@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
+print("KEY:", os.getenv("OPENAI_API_KEY"))
 app = FastAPI(title="Acme SaaS Billing RAG Chatbot")
 
 app.add_middleware(
@@ -33,7 +34,7 @@ index = pc.Index(index_name)
 
 class ChatRequest(BaseModel):
     query: str
-    prompt_mode: str = "cot"   # "basic" | "refined" | "cot"
+    prompt_mode: str = "cot"   # "basic" | "refined" | "zot" (default: "cot")
 
 
 #  Prompts 
