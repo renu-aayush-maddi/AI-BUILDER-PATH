@@ -1,9 +1,3 @@
-"""
-rag/rag_tool.py
-────────────────
-LangChain Tool wrapper around Pinecone vectorstore.
-Used by the agent to answer questions from HR policy documents.
-"""
 
 import os
 from dotenv import load_dotenv
@@ -20,7 +14,6 @@ TOP_K = 5
 
 
 def _load_vectorstore() -> PineconeVectorStore:
-    """Connect to the existing Pinecone index."""
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
     return PineconeVectorStore(
         index_name=INDEX_NAME,
@@ -29,15 +22,6 @@ def _load_vectorstore() -> PineconeVectorStore:
 
 
 def search_hr_policy(query: str) -> str:
-    """
-    Search the Presidio HR Policy Pinecone index for relevant information.
-
-    Args:
-        query: A natural language question about HR policies.
-
-    Returns:
-        Relevant excerpts from HR policy documents.
-    """
     try:
         vectorstore = _load_vectorstore()
         results = vectorstore.similarity_search(query, k=TOP_K)
@@ -53,15 +37,10 @@ def search_hr_policy(query: str) -> str:
         return "\n\n---\n\n".join(formatted)
 
     except Exception as e:
-        return (
-            f"❌ Error querying Pinecone RAG tool: {e}\n"
-            "Make sure you've run `uv run python rag/vectorize.py` first "
-            "and that PINECONE_API_KEY is set in your .env file."
-        )
+        return (f"Error querying Pinecone RAG tool: {e}\n")
 
 
 def get_rag_tool() -> Tool:
-    """Return a configured LangChain Tool for HR Policy RAG retrieval via Pinecone."""
     return Tool(
         name="hr_policy_search",
         func=search_hr_policy,

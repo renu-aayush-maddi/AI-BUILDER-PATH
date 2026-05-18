@@ -22,9 +22,7 @@ DOC_ID = os.getenv("GOOGLE_DOC_ID")
 
 def query_google_docs(query: str) -> str:
 
-    document = service.documents().get(
-        documentId=DOC_ID
-    ).execute()
+    document = service.documents().get(documentId=DOC_ID).execute()
 
     content = ""
 

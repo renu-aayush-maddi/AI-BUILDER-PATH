@@ -1,9 +1,14 @@
+
+RAG
 What is Presidio's parental leave policy?
+Explain our remote work policy.
+What AI compliance rules must employees follow?
 
+
+DOCS
 Summarize customer feedback from Q1 campaigns.
+What customer issues were reported in insurance operations?
 
-Find AI compliance policies related to customer data.
-
-Compare hiring trends with industry benchmarks.
-
-What remote work policies exist?
+WEBSEARCH
+WHAT ARE LATEST AI NEWS 2026
+What are the latest GDPR updates for AI systems?

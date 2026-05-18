@@ -14,10 +14,7 @@ from tools.web_search_tool import get_web_search_tool
 
 def build_agent():
 
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0
-    )
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=0)
 
     tools = [
         get_mcp_tool(),
@@ -25,15 +22,13 @@ def build_agent():
         get_web_search_tool(),
     ]
 
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        return_messages=True
-    )
+    memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
 
     agent = initialize_agent(
         tools=tools,
         llm=llm,
         agent=AgentType.OPENAI_FUNCTIONS,
+        # agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
         memory=memory,
         verbose=True,
     )
@@ -61,9 +56,7 @@ def main():
 
         try:
 
-            response = agent.invoke({
-                "input": query
-            })
+            response = agent.invoke({"input": query})
 
             print("\nRESPONSE:\n")
             print(response["output"])
