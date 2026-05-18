@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--color-background-tertiary); min-height: 100vh; }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .sidebar {
+    background: var(--color-background-primary);
+    border-right: 0.5px solid var(--color-border-tertiary);
+    padding: 1.25rem 1rem;
+    display: flex; flex-direction: column; gap: 1.25rem;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .brand-icon { width: 32px; height: 32px; border-radius: var(--border-radius-md); background: #534AB7; display: flex; align-items: center; justify-content: center; }
+  .brand-icon i { color: #fff; font-size: 16px; }
+  .brand-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); line-height: 1.2; }
+  .brand-sub { font-size: 11px; color: var(--color-text-secondary); }
+
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+  .tool-card {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .tool-card:hover { background: var(--color-background-secondary); }
+  .tool-card.active { border-color: #7F77DD; background: #EEEDFE; }
+  .tool-card.active .tool-name { color: #3C3489; }
+  .tool-dot { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tool-dot i { font-size: 15px; }
+  .tool-dot.mcp { background: #E1F5EE; color: #0F6E56; }
+  .tool-dot.rag { background: #EEEDFE; color: #534AB7; }
+  .tool-dot.web { background: #E6F1FB; color: #185FA5; }
+  .tool-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .tool-desc { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.4; }
+
+  .preset-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .preset-btn {
+    width: 100%; text-align: left; background: none; border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md); padding: 8px 10px; cursor: pointer; font-size: 12px;
+    color: var(--color-text-secondary); margin-bottom: 5px; transition: all 0.1s;
+    display: flex; align-items: flex-start; gap: 7px; font-family: var(--font-sans);
+  }
+  .preset-btn:hover { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-secondary); }
+  .preset-btn i { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+
+  .status-row { margin-top: auto; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 1rem; }
+  .status-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 5px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot.green { background: #1D9E75; }
+  .dot.yellow { background: #EF9F27; }
+  .dot.gray { background: var(--color-border-secondary); }
+
+  .main { display: flex; flex-direction: column; height: 100vh; }
+
+  .topbar {
+    background: var(--color-background-primary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    padding: 0.75rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .topbar-sub { font-size: 12px; color: var(--color-text-secondary); }
+  .mode-toggle { display: flex; gap: 4px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 3px; }
+  .mode-btn { border: none; background: none; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); }
+  .mode-btn.active { background: var(--color-background-primary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-tertiary); font-weight: 500; }
+
+  .chat-area { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .msg { display: flex; gap: 10px; max-width: 90%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.assistant { align-self: flex-start; }
+
+  .avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; }
+  .avatar.user-av { background: #534AB7; color: #fff; }
+  .avatar.agent-av { background: #1D9E75; color: #fff; }
+
+  .bubble {
+    padding: 10px 14px; border-radius: var(--border-radius-lg);
+    font-size: 13px; line-height: 1.6; border: 0.5px solid var(--color-border-tertiary);
+  }
+  .bubble.user { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; border-radius: var(--border-radius-lg) var(--border-radius-lg) 4px var(--border-radius-lg); }
+  .bubble.assistant { background: var(--color-background-primary); color: var(--color-text-primary); border-radius: var(--border-radius-lg) var(--border-radius-lg) var(--border-radius-lg) 4px; }
+
+  .tool-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 99px; margin-bottom: 6px; margin-right: 4px;
+  }
+  .badge-mcp { background: #E1F5EE; color: #0F6E56; }
+  .badge-rag { background: #EEEDFE; color: #534AB7; }
+  .badge-web { background: #E6F1FB; color: #185FA5; }
+
+  .thinking { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); padding: 8px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+  .dots span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--color-text-tertiary); margin: 0 1px; animation: bounce 1.2s infinite; }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+
+  .input-area {
+    background: var(--color-background-primary);
+    border-top: 0.5px solid var(--color-border-tertiary);
+    padding: 1rem 1.25rem;
+  }
+  .input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .input-wrap { flex: 1; position: relative; }
+  textarea {
+    width: 100%; border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-lg); padding: 10px 14px;
+    font-size: 13px; font-family: var(--font-sans); color: var(--color-text-primary);
+    background: var(--color-background-primary); resize: none; outline: none;
+    line-height: 1.5; max-height: 120px;
+  }
+  textarea:focus { border-color: #7F77DD; box-shadow: 0 0 0 2px #EEEDFE; }
+  .send-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: #534AB7; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .send-btn:hover { background: #3C3489; }
+  .send-btn:disabled { background: var(--color-border-tertiary); cursor: not-allowed; }
+  .send-btn i { color: #fff; font-size: 16px; }
+
+  .tool-filter { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .filter-chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+    border-radius: 99px; border: 0.5px solid var(--color-border-tertiary);
+    font-size: 11px; cursor: pointer; background: none; font-family: var(--font-sans);
+    color: var(--color-text-secondary); transition: all 0.1s;
+  }
+  .filter-chip:hover { background: var(--color-background-secondary); }
+  .filter-chip.on { border-color: #7F77DD; background: #EEEDFE; color: #3C3489; }
+  .filter-chip i { font-size: 12px; }
+
+  .welcome {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--color-text-secondary); text-align: center; padding: 2rem;
+  }
+  .welcome i { font-size: 32px; color: var(--color-border-secondary); }
+  .welcome p { font-size: 13px; }
+  .welcome strong { color: var(--color-text-primary); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-building" aria-hidden="true"></i></div>
+      <div>
+        <div class="brand-name">Presidio</div>
+        <div class="brand-sub">Research Agent</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Tools</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="tool-card active" onclick="toggleTool(this,'mcp')">
+          <div class="tool-dot mcp"><i class="ti ti-brand-google" aria-hidden="true"></i></div>
+          <div>
+            <div class="tool-name">MCP — Google Docs</div>
+            <div class="tool-desc">Insurance queries & company knowledge base</div>
+          </div>
+        </div>
+        <div class="tool-card active" onclick="toggleTool(this,'rag')">
+          <div class="tool-dot rag"><i class="ti ti-file-text" aria-hidden="true"></i></div>
+          <div>
+            <div class="tool-name">RAG — HR Policies</div>
+            <div class="tool-desc">Pinecone vector search on internal docs</div>
+          </div>
+        </div>
+        <div class="tool-card active" onclick="toggleTool(this,'web')">
+          <div class="tool-dot web"><i class="ti ti-world" aria-hidden="true"></i></div>
+          <div>
+            <div class="tool-name">Web Search</div>
+            <div class="tool-desc">Industry benchmarks & regulatory updates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="preset-label">Sample queries</div>
+      <button class="preset-btn" onclick="fillQuery(this.dataset.q)" data-q="Summarize all customer feedback related to our Q1 marketing campaigns.">
+        <i class="ti ti-speakerphone" aria-hidden="true"></i>Q1 marketing campaign feedback
+      </button>
+      <button class="preset-btn" onclick="fillQuery(this.dataset.q)" data-q="Compare our current hiring trend with industry benchmarks.">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i>Hiring trend vs benchmarks
+      </button>
+      <button class="preset-btn" onclick="fillQuery(this.dataset.q)" data-q="Find relevant compliance policies related to AI data handling.">
+        <i class="ti ti-shield-check" aria-hidden="true"></i>AI compliance policies
+      </button>
+      <button class="preset-btn" onclick="fillQuery(this.dataset.q)" data-q="What is our parental leave policy?">
+        <i class="ti ti-heart" aria-hidden="true"></i>Parental leave policy
+      </button>
+      <button class="preset-btn" onclick="fillQuery(this.dataset.q)" data-q="What are the latest AI regulations in the United States in 2025?">
+        <i class="ti ti-gavel" aria-hidden="true"></i>Latest US AI regulations
+      </button>
+    </div>
+
+    <div class="status-row">
+      <div class="section-label">Server status</div>
+      <div class="status-item"><div class="dot green"></div>MCP server — localhost:8000</div>
+      <div class="status-item"><div class="dot green"></div>Pinecone index connected</div>
+      <div class="status-item"><div class="dot yellow"></div>Tavily web search — ready</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title">Internal Research Agent</div>
+          <div class="topbar-sub">ReAct agent · GPT-4o · 3 tools active</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="mode-toggle">
+          <button class="mode-btn active" onclick="setMode('chat',this)">Chat</button>
+          <button class="mode-btn" onclick="setMode('debug',this)">Debug</button>
+        </div>
+        <button onclick="clearChat()" style="background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:5px 10px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);font-family:var(--font-sans);">
+          <i class="ti ti-trash" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chat">
+      <div class="welcome" id="welcome">
+        <i class="ti ti-message-dots" aria-hidden="true"></i>
+        <p><strong>Ask anything about Presidio</strong></p>
+        <p>The agent will automatically pick the right tool —<br>MCP docs, HR policy RAG, or live web search.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="tool-filter">
+        <button class="filter-chip on" id="chip-mcp" onclick="toggleChip('mcp')"><i class="ti ti-brand-google" aria-hidden="true"></i>MCP</button>
+        <button class="filter-chip on" id="chip-rag" onclick="toggleChip('rag')"><i class="ti ti-file-text" aria-hidden="true"></i>RAG</button>
+        <button class="filter-chip on" id="chip-web" onclick="toggleChip('web')"><i class="ti ti-world" aria-hidden="true"></i>Web</button>
+        <span style="font-size:11px;color:var(--color-text-tertiary);align-self:center;margin-left:4px;">Active tools</span>
+      </div>
+      <div class="input-row">
+        <div class="input-wrap">
+          <textarea id="queryInput" rows="1" placeholder="Ask about HR policies, campaigns, compliance, benchmarks…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendQuery()" aria-label="Send">
+          <i class="ti ti-send" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const activeTools = { mcp: true, rag: true, web: true };
+let mode = 'chat';
+
+const agentResponses = {
+  mcp: [
+    { badges: ['mcp'], text: "Based on the Q1 Marketing Campaign document in Google Docs, here's a summary of customer feedback:\n\n<strong>Positive signals:</strong> 72% of surveyed customers rated the campaign messaging as 'highly relevant'. The digital ad series saw a 3.4× engagement lift vs. Q4 baseline.\n\n<strong>Areas flagged:</strong> 18% of respondents noted the email cadence felt too frequent. The LinkedIn campaign underperformed in the 35–44 age bracket by ~22%.\n\n<strong>Action items noted in the doc:</strong> Revise email frequency to 2×/week, A/B test LinkedIn creative for mid-career personas." },
+  ],
+  rag: [
+    { badges: ['rag'], text: "From Presidio's HR Policy document (Section 2.3):\n\n<strong>Primary caregiver:</strong> 26 weeks of fully paid parental leave.\n<strong>Secondary caregiver:</strong> 4 weeks of fully paid parental leave.\n<strong>Adoption:</strong> Treated on par with biological parenthood.\n\nLeave can be taken in one block or split into two periods within the first year of the child's birth or adoption. Employees must notify HR at least 8 weeks in advance where possible." },
+    { badges: ['rag'], text: "From the HR Policy document (Sections 6.2 & 10.4):\n\n<strong>Internal AI usage:</strong> Approved tools include Microsoft Copilot and sanctioned LLM platforms. Uploading PII or confidential client data to non-approved tools is strictly prohibited.\n\n<strong>External compliance:</strong> Presidio follows the NIST AI Risk Management Framework. All customer-facing AI systems undergo annual bias audits and must be registered with the Data Governance Committee." },
+  ],
+  web: [
+    { badges: ['web'], text: "Based on recent web sources (2025):\n\n<strong>US tech industry average time-to-hire:</strong> 23 days (LinkedIn Talent Insights, Q1 2025). Presidio's internal benchmark of 18 days places it ~22% ahead of market.\n\n<strong>AI/ML role demand:</strong> Up 41% YoY across Fortune 500 companies. Your 60% AI-role hiring mix aligns with high-growth tech peers.\n\n<strong>Campus hiring trend:</strong> Industry average campus hire increase is ~18% YoY — Presidio's 30% growth outpaces the sector significantly." },
+    { badges: ['web'], text: "Latest US AI regulations (2025):\n\n<strong>Executive Order on AI (updated Jan 2025):</strong> Federal agencies must complete AI risk assessments for high-impact systems by Q3 2025.\n\n<strong>State-level:</strong> California SB 1047 successor bill is under debate, focusing on frontier model liability. Texas and Illinois passed their own algorithmic accountability laws.\n\n<strong>EU AI Act (cross-border impact):</strong> High-risk AI system obligations took full effect Feb 2025 — relevant if Presidio processes EU customer data." },
+  ],
+  multi: [
+    { badges: ['rag','web'], text: "Pulling from both internal policy and external benchmarks:\n\n<strong>Presidio policy (RAG):</strong> 26 weeks paid leave for primary caregiver; 4 weeks for secondary.\n\n<strong>Industry benchmark (web):</strong> Fortune 500 average is 18 weeks paid for primary, 2 weeks for secondary (Mercer Benefits Survey 2025).\n\nPresidio's parental leave is approximately <strong>44% more generous</strong> than the large-company average — a meaningful retention and recruiting differentiator." },
+    { badges: ['mcp','rag','web'], text: "Cross-referencing all three sources:\n\n<strong>Google Docs (MCP):</strong> No specific AI compliance doc found — the insurance knowledge base doesn't cover this topic directly.\n\n<strong>HR Policy RAG:</strong> Internal policy requires DPIA for all AI systems handling personal data; training on customer data needs Data Governance Committee sign-off.\n\n<strong>Web Search:</strong> Externally, NIST AI RMF, EU AI Act (high-risk classification), and emerging US state laws are the key frameworks to monitor.\n\n<em>Recommendation:</em> Presidio's internal controls align well with NIST RMF. A gap may exist around EU AI Act documentation requirements if you process EU data." },
+  ]
+};
+
+function pickResponse(query) {
+  const q = query.toLowerCase();
+  const hasQ1 = q.includes('q1') || q.includes('campaign') || q.includes('feedback') || q.includes('marketing');
+  const hasLeave = q.includes('leave') || q.includes('parental') || q.includes('maternity');
+  const hasHiring = q.includes('hiring') || q.includes('benchmark') || q.includes('trend');
+  const hasCompliance = q.includes('compliance') || q.includes('ai data') || q.includes('regulation') || q.includes('policy');
+
+  if (!activeTools.mcp && !activeTools.rag && !activeTools.web) {
+    return { badges: [], text: "No tools are currently active. Enable at least one tool using the filter chips above, then try again." };
+  }
+
+  if (hasHiring && activeTools.web) return agentResponses.multi[0];
+  if (hasCompliance && activeTools.rag && activeTools.web) return agentResponses.multi[1];
+  if (hasQ1 && activeTools.mcp) return agentResponses.mcp[0];
+  if (hasLeave && activeTools.rag) return agentResponses.rag[0];
+  if (hasCompliance && activeTools.rag) return agentResponses.rag[1];
+  if (activeTools.web) return agentResponses.web[Math.floor(Math.random() * agentResponses.web.length)];
+  if (activeTools.rag) return agentResponses.rag[0];
+  if (activeTools.mcp) return agentResponses.mcp[0];
+  return { badges: [], text: "I couldn't find a matching response for that query. Try asking about HR policies, campaigns, benchmarks, or compliance topics." };
+}
+
+function toolLabel(key) {
+  return { mcp: 'MCP · Google Docs', rag: 'RAG · Pinecone', web: 'Web · Tavily' }[key] || key;
+}
+function toolClass(key) {
+  return 'badge-' + key;
+}
+
+function addMsg(role, content, badges) {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+
+  const initials = role === 'user' ? 'You' : 'AI';
+  const avClass = role === 'user' ? 'user-av' : 'agent-av';
+
+  let badgeHtml = '';
+  if (badges && badges.length) {
+    badgeHtml = '<div style="margin-bottom:6px;">' + badges.map(b => `<span class="tool-badge ${toolClass(b)}"><i class="ti ti-${b==='mcp'?'brand-google':b==='rag'?'file-text':'world'}" style="font-size:9px"></i>${toolLabel(b)}</span>`).join('') + '</div>';
+  }
+
+  wrap.innerHTML = `
+    <div class="avatar ${avClass}">${role === 'user' ? '<i class="ti ti-user" style="font-size:13px;color:#fff"></i>' : '<i class="ti ti-robot" style="font-size:13px;color:#fff"></i>'}</div>
+    <div class="bubble ${role}">${badgeHtml}${content.replace(/\n/g,'<br>')}</div>
+  `;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addThinking() {
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg assistant';
+  wrap.id = 'thinking-bubble';
+  const tools = Object.keys(activeTools).filter(k => activeTools[k]);
+  wrap.innerHTML = `
+    <div class="avatar agent-av"><i class="ti ti-robot" style="font-size:13px;color:#fff"></i></div>
+    <div class="thinking">
+      <div class="dots"><span></span><span></span><span></span></div>
+      Routing to ${tools.join(', ')} tool${tools.length > 1 ? 's' : ''}…
+    </div>
+  `;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+  return wrap;
+}
+
+async function sendQuery() {
+
+  const input = document.getElementById('queryInput');
+  const query = input.value.trim();
+
+  if (!query) return;
+
+  input.value = '';
+  input.style.height = '';
+
+  addMsg('user', query);
+
+  const thinkEl = addThinking();
+
+  try {
+
+    const response = await fetch("http://127.0.0.1:8000/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        query: query
+      })
+    });
+
+    const data = await response.json();
+
+    thinkEl.remove();
+
+    if (data.success) {
+
+      addMsg(
+        'assistant',
+        data.response,
+        []
+      );
+
+    } else {
+
+      addMsg(
+        'assistant',
+        "Error: " + data.error,
+        []
+      );
+    }
+
+  } catch (err) {
+
+    thinkEl.remove();
+
+    addMsg(
+      'assistant',
+      "Backend connection failed.",
+      []
+    );
+  }
+}
+
+
+function addDebugTrace(query, badges) {
+  const chat = document.getElementById('chat');
+  const el = document.createElement('div');
+  el.style.cssText = 'background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:11px;color:var(--color-text-secondary);font-family:var(--font-mono);line-height:1.7;max-width:90%;align-self:flex-start;';
+  const steps = [];
+  steps.push(`[ReAct] Input: "${query.slice(0,60)}${query.length>60?'…':''}"`);
+  steps.push(`[ReAct] Thought: Determine which tool(s) can answer this query.`);
+  badges.forEach((b,i) => {
+    steps.push(`[Action ${i+1}] tool="${b==='mcp'?'google_docs_mcp':b==='rag'?'hr_policy_search':'web_search'}" query="${query.slice(0,40)}…"`);
+    steps.push(`[Observation ${i+1}] Retrieved ${Math.floor(Math.random()*4+2)} relevant results.`);
+  });
+  steps.push(`[ReAct] Final answer synthesized from ${badges.length} source(s).`);
+  el.innerHTML = steps.join('<br>');
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function fillQuery(q) {
+  const input = document.getElementById('queryInput');
+  input.value = q;
+  input.focus();
+  autoResize(input);
+}
+
+function toggleTool(card, tool) {
+  activeTools[tool] = !activeTools[tool];
+  card.classList.toggle('active', activeTools[tool]);
+  document.getElementById('chip-' + tool).classList.toggle('on', activeTools[tool]);
+}
+
+function toggleChip(tool) {
+  activeTools[tool] = !activeTools[tool];
+  document.getElementById('chip-' + tool).classList.toggle('on', activeTools[tool]);
+  const cards = document.querySelectorAll('.tool-card');
+  cards.forEach(c => {
+    if (c.getAttribute('onclick')?.includes(`'${tool}'`)) c.classList.toggle('active', activeTools[tool]);
+  });
+}
+
+function setMode(m, btn) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function clearChat() {
+  const chat = document.getElementById('chat');
+  chat.innerHTML = `<div class="welcome" id="welcome"><i class="ti ti-message-dots" aria-hidden="true"></i><p><strong>Ask anything about Presidio</strong></p><p>The agent will automatically pick the right tool —<br>MCP docs, HR policy RAG, or live web search.</p></div>`;
+}
+</script>
+</body>
+</html>

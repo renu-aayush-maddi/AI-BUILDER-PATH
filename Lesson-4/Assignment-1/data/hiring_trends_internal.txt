@@ -1,0 +1,15 @@
+Presidio Hiring Trends Report
+
+Q1 2026:
+- 35 software engineers hired
+- 12 AI engineers hired
+- 8 cybersecurity specialists hired
+
+Q2 2026:
+- Increased demand for GenAI specialists
+- 22% increase in cloud engineering recruitment
+- Remote hiring expanded across India and Singapore
+
+Challenges:
+- Difficulty hiring senior AI architects
+- Increased salary expectations in machine learning roles

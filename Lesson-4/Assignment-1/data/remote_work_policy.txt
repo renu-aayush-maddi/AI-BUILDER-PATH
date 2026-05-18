@@ -1,0 +1,12 @@
+Remote Work Policy
+
+Employees may work remotely three days per week.
+
+Requirements:
+
+- Stable internet connection
+- VPN usage mandatory
+- Multi-factor authentication required
+- Work devices must remain encrypted
+
+Managers may request in-office attendance for critical meetings.

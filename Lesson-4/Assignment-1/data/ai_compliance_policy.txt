@@ -1,0 +1,13 @@
+Presidio AI Data Handling and Compliance Policy
+
+Employees using AI systems must ensure:
+
+1. Customer PII is never exposed to external AI systems.
+2. AI-generated outputs must be reviewed by human supervisors.
+3. All AI interactions are logged for auditing.
+4. Models must comply with GDPR, HIPAA, and SOC2 policies.
+5. Internal AI systems must use encrypted storage.
+6. AI recommendations cannot be directly deployed to production without validation.
+7. Sensitive insurance claim data must remain within approved enterprise systems.
+
+Violations may result in disciplinary action.
