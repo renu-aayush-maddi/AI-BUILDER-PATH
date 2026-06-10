@@ -1,3 +1,7 @@
 .env
 venv/
 __pycache__/
+app.py
+backup1.py
+backup.py
+L5A1/
