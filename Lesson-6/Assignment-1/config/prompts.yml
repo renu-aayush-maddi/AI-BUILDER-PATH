@@ -1,0 +1,11 @@
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to decide if the user's message should be blocked.
+      
+      Policy: This is a corporate support bot. It is ONLY allowed to discuss internal IT support and Finance/Payroll questions. Any other topic (trivia, cooking, geography, coding help, general knowledge) MUST be blocked.
+      
+      User message: "{{ user_input }}"
+      
+      Question: Should this message be blocked?
+      Answer exactly "yes" (to block) or "no" (to allow).
